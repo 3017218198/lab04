@@ -1,12 +1,256 @@
-﻿<Window x:Class="lab04.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:lab04"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
+        xmlns:wfi="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
+        xmlns:zedgraph="clr-namespace:ZedGraph;assembly=ZedGraph" x:Class="lab04.MainWindow"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+    <Viewbox>
+
+        <Grid>
+
+            <!--buttons-->
+            <Button x:Name="Connect"
+                Content="连接" 
+                HorizontalAlignment="Left" 
+                Margin="45,125,0,0" 
+                VerticalAlignment="Top" 
+                Height="20"
+                Width="75"
+                Click="Connect_Click"/>
+            <Button x:Name="Break"
+                Content="断开" 
+                HorizontalAlignment="Left" 
+                Margin="150,125,0,0" 
+                VerticalAlignment="Top" 
+                Height="20"
+                Width="75"
+                Click="Break_Click"/>
+            <Button Name="Send"
+                Content="发送" 
+                HorizontalAlignment="Left" 
+                Height="20" 
+                Margin="300,85,0,0" 
+                VerticalAlignment="Top" 
+                Width="50"
+                Click="Send_Click"/>
+
+            <!--sliders-->
+
+            <DockPanel Name="Red"
+                       VerticalAlignment="Top" 
+                       HorizontalAlignment="Left"
+                       Margin="570,10,0,0"
+                       Width="200"
+                       Height="20">
+                <TextBox Name="TextRed"
+                     Text="{Binding ElementName=sliderRed, 
+                                    Path=Value, 
+                                    UpdateSourceTrigger=PropertyChanged}" 
+                     DockPanel.Dock="Right" 
+                     TextAlignment="Right" 
+                     Width="25"
+                     TextChanged="TextRed_TextChanged"/>
+                <Slider Minimum="0"
+                        Maximum="255"
+                        Width="175" 
+                        Name="sliderRed" />
+            </DockPanel>
+
+            <DockPanel Name="Green"
+                       VerticalAlignment="Top" 
+                       HorizontalAlignment="Left"
+                       Margin="570,35,0,0"
+                       Width="200"
+                       Height="20">
+                <TextBox Name="TextGreen"
+                     Text="{Binding ElementName=sliderGreen, 
+                                    Path=Value, 
+                                    UpdateSourceTrigger=PropertyChanged}" 
+                     DockPanel.Dock="Right" 
+                     TextAlignment="Right" 
+                     Width="25"
+                     TextChanged="TextGreen_TextChanged"/>
+                <Slider Minimum="0"
+                        Maximum="255" 
+                        Width="175" 
+                        Name="sliderGreen" />
+            </DockPanel>
+
+            <DockPanel Name="Yellow"
+                       VerticalAlignment="Top" 
+                       HorizontalAlignment="Left"
+                       Margin="570,60,0,0"
+                       Width="200"
+                       Height="20">
+                <TextBox Name="TextYellow"
+                     Text="{Binding ElementName=sliderYellow, 
+                                    Path=Value, 
+                                    UpdateSourceTrigger=PropertyChanged}" 
+                     DockPanel.Dock="Right" 
+                     TextAlignment="Right" 
+                     Width="25"
+                     TextChanged="TextYellow_TextChanged"/>
+                <Slider Minimum="0"
+                        Maximum="255" 
+                        Width="175" 
+                        Name="sliderYellow" />
+            </DockPanel>
+
+            <DockPanel Name="Blue"
+                       VerticalAlignment="Top" 
+                       HorizontalAlignment="Left"
+                       Margin="570,85,0,0"
+                       Width="200"
+                       Height="20">
+                <TextBox Name="TextBlue"
+                     Text="{Binding ElementName=sliderBlue, 
+                                    Path=Value, 
+                                    UpdateSourceTrigger=PropertyChanged}" 
+                     DockPanel.Dock="Right" 
+                     TextAlignment="Right" 
+                     Width="25"
+                     TextChanged="TextBlue_TextChanged"/>
+                <Slider Minimum="0"
+                        Maximum="255" 
+                        Width="175" 
+                        Name="sliderBlue" />
+            </DockPanel>
+
+            <DockPanel Name="White"
+                       VerticalAlignment="Top" 
+                       HorizontalAlignment="Left"
+                       Margin="570,110,0,0"
+                       Width="200"
+                       Height="20">
+                <TextBox Name="TextWhite"
+                     Text="{Binding ElementName=sliderWhite, 
+                                    Path=Value, 
+                                    UpdateSourceTrigger=PropertyChanged}" 
+                     DockPanel.Dock="Right" 
+                     TextAlignment="Right" 
+                     Width="25"
+                     TextChanged="TextWhite_TextChanged"/>
+                <Slider Minimum="0"
+                        Maximum="255" 
+                        Width="175" 
+                        Name="sliderWhite" />
+            </DockPanel>
+
+            <!--rectangles-->
+
+            <!--radiobutton-->
+            <RadioButton Name="OpenLED"
+                     Content="颜色块显示LED明暗"
+                     HorizontalAlignment="Left" 
+                     Margin="600,145,0,0" 
+                     VerticalAlignment="Top"
+                     IsChecked="False"
+                     GroupName="RightPattern"
+                     Click="OpenLED_Click"/>
+
+            <!--comboboxes-->
+            <ComboBox x:Name="SerialPortSelection"
+                  HorizontalAlignment="Left" 
+                  Height="20" 
+                  Margin="60,25,0,0"
+                  VerticalAlignment="Top" 
+                  DropDownOpened="SerialPortSelection_DropDownOpened"
+                  Width="150"
+                  SelectedIndex="0">
+                <System:String>选择串口名称</System:String>
+            </ComboBox>
+
+            <ComboBox x:Name="BPSSelection"
+                  HorizontalAlignment="Left" 
+                  
+                  Height="20" 
+                  Margin="60,70,0,0" 
+                  VerticalAlignment="Top" 
+                  Width="150"
+                  SelectedIndex="0"
+                  SelectionChanged="BPSSelection_SelectionChanged">
+
+                <System:String>选择通讯速率</System:String>
+                <System:String>9600</System:String>
+                <System:String>19200</System:String>
+                <System:String>38400</System:String>
+                <System:String>57600</System:String>
+            </ComboBox>
+
+            <!--textboxes-->
+
+            <!--listviews-->
+            <TextBox Name="send"
+                     Height="25"
+                     Width="120"
+                     Margin="250, 25,0,0"
+                     VerticalAlignment="Top"
+                     HorizontalAlignment="Left">
+
+            </TextBox>
+            <TextBox Name="receive"
+                     Height="100"
+                     Width="120"
+                     VerticalAlignment="Top"
+                     HorizontalAlignment="Left"
+                     Margin="400,25,0,0"
+                     />
+
+            <!--canvas-->
+
+
+            <WindowsFormsHost Name="windowsFormsHost1" 
+                              VerticalAlignment="Top"
+                              HorizontalAlignment="Left" 
+                              Height="175" 
+                              Width="600"
+                              Foreground="#00000000" 
+                              Margin="100,175,9.6,-27.2">
+
+                <zedgraph:ZedGraphControl x:Name="zedGraphControl1"
+                             Width="240"
+                             Height="100" />
+            </WindowsFormsHost>
+
+            <!--labels-->
+
+            <Label Content="红灯" 
+               FontSize="8"
+               HorizontalAlignment="Left" 
+               Margin="530,10,0,0" 
+               VerticalAlignment="Top"
+               Height="20"/>
+            <Label Content="绿灯" 
+               FontSize="8" 
+               HorizontalAlignment="Left" 
+               Margin="530,35,0,0" 
+               VerticalAlignment="Top"
+               Height="20"/>
+            <Label Content="黄灯" 
+               FontSize="8" 
+               HorizontalAlignment="Left" 
+               Margin="530,60,0,0" 
+               VerticalAlignment="Top"
+               Height="20"/>
+            <Label Content="蓝灯" 
+               FontSize="8"
+               HorizontalAlignment="Left" 
+               Margin="530,85,0,0" 
+               VerticalAlignment="Top"
+               Height="20"/>
+            <Label Content="白灯"
+               FontSize="8" 
+               HorizontalAlignment="Left" 
+               Margin="530,110,0,0" 
+               VerticalAlignment="Top"
+               Height="20"/>
+
+
+        </Grid>
+    </Viewbox>
 </Window>
