@@ -1,6 +1,8 @@
 unsigned long timeoutStart;    // find out whether timeout
+
+unsigned long seconds = 0;     // CMU timer
+
 int continued = 1;
-unsigned long seconds = 0;
 
 // functions here
 // error function
@@ -23,7 +25,7 @@ void writesValid() {
   delay(200);
 }
 
-// success function
+// success function: output success while change LED
 void writesSuccess(){
   byte b[3];
   b[0] = 0x11;
@@ -33,23 +35,26 @@ void writesSuccess(){
   delay(200);
 }
 
-// temperature function
-//void getTemperature(double ADreads)
-//{
-//  double R5=10000.0;
-//  double R0=10000.0;
-//  double T0=25+273.15;
-//  double B=3435.0;
-//  double temperature_fah = (B*T0)/(B + T0*(log(1024/ADreads - 1) + log(R5/R0)));
-//  return temperature_fah;
-//}
 
+double getTemperature(double ADreads)
+{
+  double R5=10000.0;
+  double R0=10000.0;
+  double T0=25+273.15;
+  double B=3435.0;
+  double temperature_fah = (B*T0)/(B + T0*(log(1024/ADreads - 1) + log(R5/R0)));
+  return temperature_fah;
+}
+
+// temperature function
 void writesTemperature() {
-  int value = analogRead(A0);
+  double value = (double)analogRead(A0);
+  double dvalue = getTemperature(value);
+  int xvalue = (int)dvalue;
   byte buffer[3];
   buffer[0] = 0xE0 | (A0 - 14);
-  buffer[1] = (byte)(value & 0x7F);
-  buffer[2] = (byte)((value >> 7) & 0x7F);
+  buffer[1] = xvalue;
+  buffer[2] = (byte)((xvalue >> 7) & 0x7F);
   if (continued == 1)
   {
     Serial.write(buffer, 3);
@@ -62,7 +67,7 @@ void writesLight() {
   int value = analogRead(A1);
   byte buffer[3];
   buffer[0] = 0xE0 | (A1 - 14);
-  buffer[1] = (byte)(value & 0x7F);
+  buffer[1] = (byte)(value & 0xFF);
   buffer[2] = (byte)((value >> 7) & 0x7F);
   Serial.write(buffer, 3);
   delay(200);
@@ -73,8 +78,8 @@ void writesLedState(int Pin) {
   int value = digitalRead(Pin);
   byte buffer[3];
   buffer[0] = 0xC0 | (Pin);
-  buffer[1] = (byte)value;
-  buffer[2] = (byte)0;
+  buffer[1] = (byte)0;
+  buffer[2] = (byte)value;
   Serial.write(buffer, 3);
   delay(200);
 }
@@ -116,10 +121,10 @@ void writesCMUTime(unsigned long seconds) {
 // resolute according to the input command
 void resoluteByte(byte b, byte c, byte d) {
   // AD output value (checked)
+  // **error with resoluting byte d
   if ((b & 0xF0) == 0xE0) {
     // resolute the pin number
     int ADPin = (b & 0xF);
-
     if (ADPin == 0)
     {
       // deal with next two bytes
@@ -171,15 +176,13 @@ void resoluteByte(byte b, byte c, byte d) {
     }
   }
 
-  // LED PWM control (checked)
+  // LED PWM control (checked error)
+  // ** error with resoluting byte d
   else if ((b & 0xF0) == 0xD0) {
     // resolute the pin number
     int DOPin = (b & 0xF);
-    int k = resoluteSecondByteInCase3(c,d);
-//    if (value == 248)
+    int k = resoluteSecondByteInCase3(c);
     analogWrite(DOPin, k);
-//    else 
-//    analogWrite(4, 0);
     writesSuccess();
   }
 
@@ -215,8 +218,8 @@ void resoluteByte(byte b, byte c, byte d) {
 }
 
 // resolute the second byte of case 1: AD output
-int resoluteSecondByteInCase1(byte b) {
-  if ((b & 0x11) == 0x11)
+int resoluteSecondByteInCase1(byte n) {
+  if ((n & 0xFF) == 0x11)
   {
     return 0;
   }
@@ -242,8 +245,8 @@ int resoluteSecondByteInCase2(byte c) {
 }
 
 // resolute the second byte of case 3: LED PWM control
-int resoluteSecondByteInCase3(byte c, byte d) {
-  return ((int)(d << 7)) + c;
+int resoluteSecondByteInCase3(byte c) {
+  return (int)c;
 }
 
 void setup() {
@@ -264,24 +267,28 @@ byte buffer[3];
 
 void loop() {
   // put your main code here, to run repeatedly:
-  unsigned long currentime = millis();
-  //  byte b = 0xFF;
-  //  byte c = 0x55;
-  //  byte d = 0x55;
-  //  resoluteByte(b,c,d);
-
-
-  // read data into buffer array
+//  unsigned long currentime = millis();  
   unsigned long timer1 = millis();    // find out input time out
+  if (timer1 - timeoutStart >= 1000)
+  {
+    timeoutStart = timer1;
+//    writesTemperature();
+    writesLight();
+  }
+//  else{
+  // read data into buffer array
+  unsigned long timer2 = millis();
   if (Serial.available() > 0)
   {
+    
     int data = Serial.read();
     if (number == 0)
     {
-      currentime = timer1;
+//      timeoutStart = timer1;
+      timeoutStart = timer2;
       buffer[0] = data;
       number++;
-      Serial.write(0);
+//      Serial.write(0);
     }
     else if (number == 1)
     {
@@ -298,7 +305,7 @@ void loop() {
     }
   }
 
-  if (timer1 - currentime >= 2000)
+  if (timer2 - timeoutStart >= 1000)
   {
     // reset the buffer byte array if time out
     number = 0;
@@ -306,12 +313,17 @@ void loop() {
     //    Serial.write(test);
   }
 
-  if (number == 2)
+  if (number == 3)
   {
+//    Serial.write(buffer[0]);
+//    Serial.write(buffer[1]);
+//    Serial.write(buffer[2]);
+    
     resoluteByte(buffer[0], buffer[1], buffer[2]);
     delay(100);
-    writesValid();
-    delay(100);
+//    writesValid();
+//    delay(100);
     number = 0;
   }
+//  }
 }

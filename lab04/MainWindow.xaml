@@ -202,7 +202,13 @@
                      />
 
             <!--canvas-->
-
+            <Ellipse Margin="530,135,0,0"  
+                     Stroke="#FFEAEAE5" 
+                     StrokeThickness="40" 
+                     Name="ShowColor"
+                     HorizontalAlignment="Left" 
+                     Width="40" Height="40" 
+                     VerticalAlignment="Top"/>
 
             <WindowsFormsHost Name="windowsFormsHost1" 
                               VerticalAlignment="Top"
@@ -210,7 +216,7 @@
                               Height="175" 
                               Width="600"
                               Foreground="#00000000" 
-                              Margin="100,175,9.6,-27.2">
+                              Margin="170,187,-0.4,-38.8">
 
                 <zedgraph:ZedGraphControl x:Name="zedGraphControl1"
                              Width="240"
@@ -249,6 +255,28 @@
                Margin="530,110,0,0" 
                VerticalAlignment="Top"
                Height="20"/>
+            <Button Name="startLog" 
+                    Content="log开始" 
+                    HorizontalAlignment="Left" 
+                    Margin="60,200,0,0" 
+                    VerticalAlignment="Top" 
+                    Width="75"
+                    Click="StartLog_Click"/>
+            <Button Name="stopLog" 
+                    Content="log结束" 
+                    HorizontalAlignment="Left" 
+                    Margin="60,250,0,0" 
+                    VerticalAlignment="Top" 
+                    Width="75"
+                    Click="StopLog_Click"/>
+            <TextBox Name="filePath" 
+                     HorizontalAlignment="Left" 
+                     Height="23" 
+                     Margin="0,300,0,0" 
+                     TextWrapping="Wrap" 
+                     Text="Enter file path" 
+                     VerticalAlignment="Top" 
+                     Width="150"/>
 
 
         </Grid>

@@ -17,6 +17,8 @@ using ZedGraph;
 using System.Drawing;
 using System.Threading;
 using System.Globalization;
+using System.IO;
+using Color = System.Drawing.Color;
 
 namespace lab04
 {
@@ -38,6 +40,12 @@ namespace lab04
         //string CommandYellow = "";
         //string CommandBlue = "";
         //string CommandWhite = "";
+
+        int redNumber = 0;
+        int yellowNumber = 0;
+        int greenNumber = 0;
+        int blueNumber = 0;
+        int whiteNumber = 0;
 
         int NumberRed = 0;
         int NumberGreen = 0;
@@ -132,27 +140,33 @@ namespace lab04
                 return;
             }
             int numOfByte = serialport.BytesToRead;
-            for (int i = 0; i < numOfByte; i++)
+            //for (int i = 0; i < numOfByte; i++)
+            //{
+
+            //    int indata = serialport.ReadByte();
+            //    string a = indata.ToString() + " " + "\n";
+            //    SetTextInTextBox(receive, a);
+
+
+
+
+            //    //AddData2(indata);
+            //}
+            int data = 0;
+            int a = serialport.ReadByte();
+            if (a == 0xE0)
             {
-
-                int indata = serialport.ReadByte();
-
-                //string tem = "";
-                //string light = "";
-                //string temp = serialport.ReadLine();
-                //if (temp.StartsWith("Temperature"))
-                //{
-                //    tem = temp.Substring(11);
-
-                //}
-                //else if (temp.StartsWith("Light"))
-                //{
-                //    light = temp.Substring(5);
-                //}
-                string a = indata.ToString() + "\n";
-
-                SetTextInTextBox(receive, a);
-                AddDataPoint(indata);
+                int b = serialport.ReadByte();
+                int c = serialport.ReadByte();
+                data = b*2;
+                AddData1(data);
+            }
+            else if (a == 0xE1)
+            {
+                int b = serialport.ReadByte();
+                int c = serialport.ReadByte();
+                data = b*2;
+                AddData1(data);
             }
         }
 
@@ -180,12 +194,15 @@ namespace lab04
         #region LED PWM controller
         private void TextRed_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string TextRedStr = TextRed.Text.ToString();            
+            string TextRedStr = TextRed.Text.ToString(); 
+            redNumber = (int)Convert.ToDouble(TextRedStr);
             NumberRed = 255 - (int)Convert.ToDouble(TextRedStr);
+            ValueChanged();
             //CommandRed = "r" + NumberRed.ToString();
             byte[] buffer = new byte[3];
             buffer[0] = 0xD4;
-            buffer[1] = (byte)(NumberRed & 0x7F);
+            //buffer[1] = (byte)(NumberRed & 0x7F);
+            buffer[1] = (byte)(NumberRed&0xFF);
             buffer[2] = (byte)((NumberRed >> 7) & 0x7F);
             if (serialport != null && OpenLED.IsChecked == true)
             {
@@ -196,10 +213,13 @@ namespace lab04
         private void TextGreen_TextChanged(object sender, TextChangedEventArgs e)
         {
             string TextGreenStr = TextGreen.Text.ToString();
-            NumberGreen = (int)Convert.ToDouble(TextGreenStr);
+            greenNumber = (int)Convert.ToDouble(TextGreenStr);
+            NumberGreen = 255 - (int)Convert.ToDouble(TextGreenStr);
+            ValueChanged();
             byte[] buffer = new byte[3];
             buffer[0] = 0xD3;
-            buffer[1] = (byte)(NumberGreen & 0x7F);
+            //buffer[1] = (byte)(NumberGreen & 0x7F);
+            buffer[1] = (byte)(NumberGreen & 0xFF);
             buffer[2] = (byte)((NumberGreen >> 7) & 0x7F);
             if (serialport != null && OpenLED.IsChecked == true)
             {
@@ -210,10 +230,13 @@ namespace lab04
         private void TextYellow_TextChanged(object sender, TextChangedEventArgs e)
         {
             string TextYellowStr = TextYellow.Text.ToString();
-            NumberYellow = (int)Convert.ToDouble(TextYellowStr);
+            yellowNumber = (int)Convert.ToDouble(TextYellowStr);
+            NumberYellow = 255 - (int)Convert.ToDouble(TextYellowStr);
+            ValueChanged();
             byte[] buffer = new byte[3];
             buffer[0] = 0xD2;
-            buffer[1] = (byte)(NumberYellow & 0x7F);
+            //buffer[1] = (byte)(NumberYellow & 0x7F);
+            buffer[1] = (byte)(NumberYellow & 0xFF);
             buffer[2] = (byte)((NumberYellow >> 7) & 0x7F);
             if (serialport != null && OpenLED.IsChecked == true)
             {
@@ -224,10 +247,13 @@ namespace lab04
         private void TextBlue_TextChanged(object sender, TextChangedEventArgs e)
         {
             string TextBlueStr = TextBlue.Text.ToString();
-            NumberBlue = (int)Convert.ToDouble(TextBlueStr);
+            blueNumber = (int)Convert.ToDouble(TextBlueStr);
+            NumberBlue = 255 - (int)Convert.ToDouble(TextBlueStr);
+            ValueChanged();
             byte[] buffer = new byte[3];
-            buffer[0] = 0xD6;
-            buffer[1] = (byte)(NumberBlue & 0x7F);
+            buffer[0] = 0xD5;
+            //buffer[1] = (byte)(NumberBlue & 0x7F);
+            buffer[1] = (byte)(NumberBlue & 0xFF);
             buffer[2] = (byte)((NumberBlue >> 7) & 0x7F);
             if (serialport != null && OpenLED.IsChecked == true)
             {
@@ -238,11 +264,15 @@ namespace lab04
         private void TextWhite_TextChanged(object sender, TextChangedEventArgs e)
         {
             string TextWhiteStr = TextWhite.Text.ToString();
-            NumberWhite = (int)Convert.ToDouble(TextWhiteStr);
+            whiteNumber = (int)Convert.ToDouble(TextWhiteStr);
+            NumberWhite = 255 - (int)Convert.ToDouble(TextWhiteStr);
+            ValueChanged();
             byte[] buffer = new byte[3];
             buffer[0] = 0xD6;
-            buffer[1] = (byte)(NumberWhite & 0x7F);
-            buffer[2] = (byte)((NumberWhite >> 7) & 0x7F);
+            //buffer[1] = (byte)(NumberWhite & 0x7F);
+            //buffer[2] = (byte)((NumberWhite >> 7) & 0x7F);
+            buffer[1] = (byte)NumberWhite;
+            buffer[2] = 0x00;
             if (serialport != null && OpenLED.IsChecked == true)
             {
                 serialport.Write(buffer, 0, 3);
@@ -255,7 +285,7 @@ namespace lab04
         {
             //MessageBox.Show(NumberRed.ToString());
             byte[] buffer = new byte[3];
-            buffer = getByteArray( send.Text.ToString());
+            buffer = getByteArray(send.Text.ToString());
             serialport.Write(buffer, 0, 3);
             //MessageBox.Show(data.ToString());
             send.Text = "";
@@ -325,32 +355,6 @@ namespace lab04
             Console.WriteLine("inititalize complete");
         }
 
-        /// <summary>
-        /// Open temperature and light and use textbox to present
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OpenTL_Click(object sender, RoutedEventArgs e)
-        {
-            // temperature
-            byte[] buffer1 = new byte[3];
-            buffer1[0] = 0xD0;
-            buffer1[1] = 0x11;
-            buffer1[2] = 0x11;
-            // light
-            byte[] buffer2 = new byte[3];
-            buffer2[0] = 0xD1;
-            buffer2[1] = 0x11;
-            buffer2[2] = 0x11;
-            
-            for (int i = 0; i < 5; ++i)
-            {
-                serialport.Write(buffer1, 0, 3);
-                serialport.Write(buffer2, 0, 3);
-            }
-
-        }
-
         public void CreateGraph(ZedGraphControl zgc)
         {
             GraphPane myPane = zgc.GraphPane;
@@ -363,60 +367,19 @@ namespace lab04
             myPane.Title.FontSpec = myFont;
             myPane.XAxis.Title.FontSpec = myFont;
             myPane.YAxis.Title.FontSpec = myFont;
+
             RollingPointPairList list1 = new RollingPointPairList(1200);
             RollingPointPairList list2 = new RollingPointPairList(1200);
             /// Initially, a curve is added with no data points (list is empty) 
             /// Color is blue,  and there will be no symbols 
             /// 开始，增加的线是没有数据点的(也就是list为空)   
-            ///增加一条名称 :Voltage ，颜色 Color.Bule ，无符号，无数据的空线条
 
             LineItem curve1 = myPane.AddCurve("Curve1", list1, System.Drawing.Color.Blue, SymbolType.None/*.Diamond*/ );
-            //LineItem curve2 = myPane.AddCurve("Voltage2", list2, System.Drawing.Color.Red, SymbolType.None);
-            //PointPairList list1 = new PointPairList();
-
-            //for (int i = 0; i < 2000; i++)
-            //{
-            //    list1.Add(i, i);
-            //}
-            //LineItem myCurve = myPane.AddCurve("Porsche", list1, System.Drawing.Color.Red, SymbolType.Diamond);
+            LineItem curve2 = myPane.AddCurve("Curve2", list2, System.Drawing.Color.Red, SymbolType.None);
             tickStart = Environment.TickCount;
-            zgc.AxisChange();
-            //Random y = new Random();
-
-            //PointPairList list1 = new PointPairList();
-
-            //for (int i = 0; i < 36; i++)
-
-            //{
-
-            //    double x = i;
-
-            //    //double y1 = 1.5 + Math.Sin((double)i * 0.2);
-
-            //    double y1 = y.NextDouble() * 1000;
-
-            //    list1.Add(x, y1); //添加一组数据
-
-            //}
-            //LineItem myCurve = myPane.AddCurve("东航", list1, System.Drawing.Color.Red, SymbolType.Star);
-            //myPane.Fill = new Fill(System.Drawing.Color.White, System.Drawing.Color.FromArgb(200, 200, 255), 45.0f);
-            //string[] labels = new string[36];
-
-            //for (int i = 0; i < 36; i++)
-
-            //{
-
-            //    labels[i] = System.DateTime.Now.AddDays(i).ToShortDateString();
-
-            //}
-
-            //myPane.XAxis.Scale.TextLabels = labels; //X轴文本取值
-
-            //myPane.XAxis.Type = AxisType.Text;   //X轴类型
-            //zgc.AxisChange();
-            //zedGraphControl.Invalidate();
-            //Refresh();
+            zgc.AxisChange();            
         }
+
         void AddDataPoint(double dataX)
         {
             // Make sure that the curvelist has at least one curve 
@@ -464,10 +427,98 @@ namespace lab04
 
 
             zedGraphControl1.AxisChange(); // Force a redraw  
-                                   //第四步:调用Form.Invalidate()方法更新图表
 
-
+            //第四步:调用Form.Invalidate()方法更新图表
             zedGraphControl1.Invalidate();
         }
+
+
+        void AddData1(double x)
+        {
+            LineItem curve = zedGraphControl1.GraphPane.CurveList[0] as LineItem;
+            IPointListEdit list = curve.Points as IPointListEdit;
+            double time = (Environment.TickCount - tickStart) / 1000.0;
+            list.Add(time, x);
+            Scale xScale = zedGraphControl1.GraphPane.XAxis.Scale;
+            if (time > xScale.Max - xScale.MajorStep)
+            {
+                xScale.Max = time + xScale.MajorStep;
+                xScale.Min = xScale.Max - 30.0;
+            }
+            zedGraphControl1.AxisChange();
+            zedGraphControl1.Invalidate();
+        }
+
+        void AddData2(double x)
+        {
+            LineItem curve = zedGraphControl1.GraphPane.CurveList[1] as LineItem;
+            IPointListEdit list = curve.Points as IPointListEdit;
+            double time = (Environment.TickCount - tickStart) / 1000.0;
+            list.Add(time, x);
+            Scale xScale = zedGraphControl1.GraphPane.XAxis.Scale;
+            if (time > xScale.Max - xScale.MajorStep)
+            {
+                xScale.Max = time + xScale.MajorStep;
+                xScale.Min = xScale.Max - 30.0;
+            }
+            zedGraphControl1.AxisChange();
+            zedGraphControl1.Invalidate();
+        }
+
+        #region txt file record
+        // txt stream writer defined here
+        StreamWriter sw = null;
+
+        /// <summary>
+        /// create txt file according to different file path from textbox
+        /// </summary>
+        /// <param name="filePath"></param>
+        public void CreateTxtFile(string filePath)
+        {
+            string file = filePath;
+            FileStream fileStream = new FileStream(file, FileMode.Append);
+            sw = new StreamWriter(fileStream);
+        }
+
+        private void StartLog_Click(object sender, RoutedEventArgs e)
+        {
+            //string result = @"D:\2019-6-2.txt";
+            //FileStream fs = new FileStream(result, FileMode.Append);
+            //StreamWriter wr = new StreamWriter(fs);
+            //wr.WriteLine("测试！");
+            //wr.Close();
+            string path = filePath.Text.ToString();            
+            CreateTxtFile(path);            
+        }
+
+        private void StopLog_Click(object sender, RoutedEventArgs e)
+        {
+            sw.Write(receive.Text.ToString());
+            receive.Text = "";
+            sw.Close();
+        }
+
+        #endregion
+
+        #region color mixture
+        /// <summary>
+        /// mix a circle with 5 colors
+        /// </summary>
+        private void ValueChanged()
+        {
+            Color Red = Color.Red;
+            Color Green = Color.Green;
+            Color Yellow = Color.Yellow;
+            Color Blue = Color.Blue;
+            Color White = Color.White;
+            double r = Yellow.R * yellowNumber / 255 + Green.R * greenNumber / 255 +
+                Blue.R * blueNumber / 255 + Red.R * redNumber / 255 + White.R * whiteNumber / 255;
+            double g = Yellow.G * yellowNumber / 255 + Green.G * greenNumber / 255 +
+                Blue.G * blueNumber / 255 + Red.G * redNumber / 255 + White.G * whiteNumber / 255;
+            double b = Yellow.B * yellowNumber / 255 + Green.B * greenNumber / 255 +
+                Blue.B * blueNumber / 255 + Red.B * redNumber / 255 + White.B * whiteNumber / 255;
+            ShowColor.Stroke = new SolidColorBrush(System.Windows.Media.Color.FromRgb((byte)r, (byte)g, (byte)b));
+        }
+        #endregion
     }
 }
