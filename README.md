@@ -21,3 +21,8 @@ Attention that the input of sliders have been reversed to fit the common scene
 #### first version(0b804a3), released in 9:16, June 1st, 2019
 1. Without json file record of received data
 2. This version is not stable enough
+
+#### second version(d468a14), released in 10:20, June 2nd, 2019
+1. Add file record function which can record the data in a txt file (not json)
+2. Add a color mixture graph into it when changing the light
+3. Limit the zedGraph to show only temperature and light
